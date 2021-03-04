@@ -1,87 +1,152 @@
-# 09 Node.js Homework: Professional README Generator
+# 10 Object-Oriented Programming: Team Profile Generator
 
 ## Your Task
 
-When creating an open source project on GitHub, it’s important to have a high-quality README for the app. This should include what the app is for, how to use the app, how to install it, how to report issues, and how to make contributions&mdash;this last part increases the likelihood that other developers will contribute to the success of the project. 
+Your task is to build a Node.js command-line application that takes in information about employees on a software engineering team, then generates an HTML webpage that displays summaries for each person. Testing is key to making code maintainable, so you’ll also write a unit test for every part of your code and ensure that it passes each test.
 
-You can quickly and easily create a README file by using a command-line application to generate one. This allows the project creator to devote more time to working on the project.
+Because this application won’t be deployed, you’ll need to provide a link to a walkthrough video that demonstrates its functionality and all of the tests passing. You’ll need to submit a link to the video AND add it to the readme of your project.
 
-Your task is to create a command-line application that dynamically generates a professional README.md file from a user's input using the [Inquirer package](https://www.npmjs.com/package/inquirer). Review the [Professional README Guide](https://coding-boot-camp.github.io/full-stack/github/professional-readme-guide) as a reminder of everything that a high-quality, professional README should contain. 
-
-The application will be invoked by using the following command:
-
-```bash
-node index.js
-```
-
-Because this application won’t be deployed, you’ll also need to provide a link to a walkthrough video that demonstrates its functionality. Revisit the Screencastify Tutorial in the prework as a refresher on how to record video from your computer. You’ll need to submit a link to the video _and_ add it to the README of your project.
-
+> **Note**: There is no starter code for this assignment.
 
 ## User Story
 
 ```md
-AS A developer
-I WANT a README generator
-SO THAT I can quickly create a professional README for a new project
+AS A manager
+I WANT to generate a webpage that displays my team's basic info
+SO THAT I have quick access to their emails and GitHub profiles
 ```
 
 ## Acceptance Criteria
 
 ```md
 GIVEN a command-line application that accepts user input
-WHEN I am prompted for information about my application repository
-THEN a high-quality, professional README.md is generated with the title of my project and sections entitled Description, Table of Contents, Installation, Usage, License, Contributing, Tests, and Questions
-WHEN I enter my project title
-THEN this is displayed as the title of the README
-WHEN I enter a description, installation instructions, usage information, contribution guidelines, and test instructions
-THEN this information is added to the sections of the README entitled Description, Installation, Usage, Contributing, and Tests
-WHEN I choose a license for my application from a list of options
-THEN a badge for that license is added near the top of the README and a notice is added to the section of the README entitled License that explains which license the application is covered under
-WHEN I enter my GitHub username
-THEN this is added to the section of the README entitled Questions, with a link to my GitHub profile
-WHEN I enter my email address
-THEN this is added to the section of the README entitled Questions, with instructions on how to reach me with additional questions
-WHEN I click on the links in the Table of Contents
-THEN I am taken to the corresponding section of the README
+WHEN I am prompted for my team members and their information
+THEN an HTML file is generated that displays a nicely formatted team roster based on user input
+WHEN I click on an email address in the HTML
+THEN my default email program opens and populates the TO field of the email with the address
+WHEN I click on the GitHub username
+THEN that GitHub profile opens in a new tab
+WHEN I start the application
+THEN I am prompted to enter the team manager’s name, employee ID, email address, and office number
+WHEN I enter the team manager’s name, employee ID, email address, and office number
+THEN I am presented with a menu with the option to add an engineer or an intern or to finish building my team
+WHEN I select the engineer option
+THEN I am prompted to enter the engineer’s name, ID, email, and GitHub username, and I am taken back to the menu
+WHEN I select the intern option
+THEN I am prompted to enter the intern’s name, ID, email, and school, and I am taken back to the menu
+WHEN I decide to finish building my team
+THEN I exit the application, and the HTML is generated
 ```
+
+## Mock-Up
+
+The following image shows a mock-up of the generated HTML’s appearance and functionality:
+
+![HTML webpage titled “My Team” features five boxes listing employee names, titles, and other key info.](./Assets/10-object-oriented-programming-homework-demo.png)
+
+The styling in the image is just an example, so feel free to add your own.
 
 ## Getting Started
 
-Here are some guidelines to help you get started:
+This homework will combine many of the skills we've covered so far. In addition to the User Story and Acceptance Criteria, we’ve provided some guidelines to help get started.
 
-* Create a `.gitignore` file and include `node_modules/` and `.DS_Store/` so that your `node_modules` directory isn't tracked or uploaded to GitHub. Be sure to create your `.gitignore` file before installing any npm dependencies.
+Your application should use [Jest](https://www.npmjs.com/package/jest) for running the unit tests and [Inquirer](https://www.npmjs.com/package/inquirer) for collecting input from the user. The application will be invoked by using the following command:
 
-* Make sure that your repo includes a `package.json` with the required dependencies. You can create one by running `npm init` when you first set up the project, before installing any dependencies.
+```bash
+node index.js
+```
 
-* Include a video of the typical user flow through your application. This includes views of the prompts and the responses after their selection.
+It is recommended that you start with a directory structure that looks like the following example:
 
-* Include any other screenshots you deem necessary to help someone who has never been introduced to your application understand the purpose and function of it. This is how you will communicate to potential employers or other developers in the future what you built and why, and to show how it works.
+```md
+__tests__/			// jest tests
+  Employee.test.js
+  Engineer.test.js
+  Intern.test.js
+  Manager.test.js
+dist/               // rendered output (HTML) and CSS style sheet
+lib/				// classes
+src/				// template helper code
+index.js			// runs the application
+```
+
+The application must include `Employee`, `Manager`, `Engineer`, and `Intern` classes. The tests for these classes (in the `_tests_` directory) must ALL pass.
+
+The first class is an `Employee` parent class with the following properties and methods:
+
+* `name`
+
+* `id`
+
+* `email`
+
+* `getName()`
+
+* `getId()`
+
+* `getEmail()`
+
+* `getRole()`&mdash;returns `'Employee'`
+
+The other three classes will extend `Employee`.
+
+In addition to `Employee`'s properties and methods, `Manager` will also have the following:
+
+* `officeNumber`
+
+* `getRole()`&mdash;overridden to return `'Manager'`
+
+In addition to `Employee`'s properties and methods, `Engineer` will also have the following:
+
+* `github`&mdash;GitHub username
+
+* `getGithub()`
+
+* `getRole()`&mdash;overridden to return `'Engineer'`
+
+In addition to `Employee`'s properties and methods, `Intern` will also have the following:
+
+* `school`
+
+* `getSchool()`
+
+* `getRole()`&mdash;overridden to return `'Intern'`
+
+Finally, although it’s not a requirement, consider adding validation to ensure that user input is in the proper format.
 
 ## Grading Requirements
 
 This homework is graded based on the following criteria: 
 
-### Deliverables: 20%
+### Deliverables: 15%
 
-* A sample README generated using the application must be submitted.
+* A sample HTML file generated using the application must be submitted.
 
 * Your GitHub repository containing your application code.
 
-### Walkthrough Video: 27%
 
-* A walkthrough video that demonstrates the functionality of the README generator must be submitted, and a link to the video should be included in your README file.
+### Walkthrough Video: 32%
+
+* A walkthrough video that demonstrates the functionality of the Team Profile Generator and passing tests must be submitted, and a link to the video should be included in your README file.
+
+* The walkthrough video must show all four tests passing from the command line.
 
 * The walkthrough video must demonstrate how a user would invoke the application from the command line.
 
 * The walkthrough video must demonstrate how a user would enter responses to all of the prompts in the application.
 
-* The walkthrough video must demonstrate a generated README that matches the user input and has a functioning table of contents.
+* The walkthrough video must demonstrate a generated HTML file that matches the user input.
+
 
 ### Technical Acceptance Criteria: 40%
 
-* Satisfies all of the above acceptance criteria plus the following:
+* Satisfies all of the preceding acceptance criteria plus the following:
 
 	* Uses the [Inquirer package](https://www.npmjs.com/package/inquirer).
+
+	* Uses the [Jest package](https://www.npmjs.com/package/jest) for a suite of unit tests.
+
+  * The application must have `Employee`, `Manager`, `Engineer`, and `Intern` classes.
 
 ### Repository Quality: 13%
 
@@ -93,19 +158,17 @@ This homework is graded based on the following criteria:
 
 * Repository contains multiple descriptive commit messages.
 
-* Repository contains a high-quality README with description and a link to walkthrough video.
-
+* Repository contains a high-quality readme with description and a link to a walkthrough video.
 
 ## Review
 
 You are required to submit the following for review:
 
-* A walkthrough video demonstrating the functionality of the application.
+* A walkthrough video that demonstrates the functionality of the application and passing tests.
 
-* A sample README.md file for a project repository generated using your application
+* A sample HTML file generated using your application.
 
-* The URL of the GitHub repository, with a unique name and a README describing the project
+* The URL of the GitHub repository, with a unique name and a readme describing the project.
 
 ---
-
 © 2021 Trilogy Education Services, LLC, a 2U, Inc. brand. Confidential and Proprietary. All Rights Reserved.

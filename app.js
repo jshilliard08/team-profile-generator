@@ -1,198 +1,209 @@
-const inquirer = require("inquirer");
-const fs = require("fs");
+const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
-const Manager = require("./lib/Manager");
+const inquirer = require("inquirer");
+const path = require("path");
+const fs = require("fs");
 
-const employees = [];
+const OUTPUT_DIR = path.resolve(__dirname, "output");
+const outputPath = path.join(OUTPUT_DIR, "team.html");
 
-function initApp() {
-    startHtml();
-    addMember();
+const render = require("./lib/htmlRenderer.js");
+
+const members = [];
+const idArr = [];
+var htmlContent = '';
+
+async function addTeamMember() {
+    const memberChoice = await inquirer.prompt({
+        type: 'list',
+        name: 'addMember',
+        message: 'Which type of team member would you like to add?',
+        choices: ['Engineer', 'Intern', 'None']
+
+    })
+    switch (memberChoice.addMember) {
+        case 'Engineer':
+            const engineerInfo = await createEngineer();
+            const engineer = new Engineer(engineerInfo.engineerName, engineerInfo.engineerId, engineerInfo.engineerEmail, engineerInfo.engineerGit);
+            members.push(engineer);
+            idArr.push(engineer.id);
+            addTeamMember();
+            break;
+        case 'Intern':
+            const internInfo = await createIntern();
+            const intern = new Intern(internInfo.internName, internInfo.internId, internInfo.internEmail, internInfo.internSchool);
+            members.push(intern);
+            idArr.push(intern.id);
+            addTeamMember();
+            break;
+        default: 
+            render(members);
+            console.log(render(members));
+            // fs.writeFile('/output', render(members), (error) => {console.log("error")});
+        };
+            
 }
 
-function addMember() {
-    inquirer.prompt([{
-        message: "Enter team member's name",
-        name: "name"
-    },
-    {
-        type: "list",
-        message: "Select team member's role",
-        choices: [
-            "Engineer",
-            "Intern",
-            "Manager"
-        ],
-        name: "role"
-    },
-    {
-        message: "Enter team member's id",
-        name: "id"
-    },
-    {
-        message: "Enter team member's email address",
-        name: "email"
-    }])
-    .then(function({name, role, id, email}) {
-        let roleInfo = "";
-        if (role === "Engineer") {
-            roleInfo = "GitHub username";
-        } else if (role === "Intern") {
-            roleInfo = "school name";
-        } else {
-            roleInfo = "office phone number";
-        }
-        inquirer.prompt([{
-            message: `Enter team member's ${roleInfo}`,
-            name: "roleInfo"
+async function createManager() {
+    return await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'managerName',
+            message: 'What is the managers name?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
         },
         {
-            type: "list",
-            message: "Would you like to add more team members?",
-            choices: [
-                "yes",
-                "no"
-            ],
-            name: "moreMembers"
-        }])
-        .then(function({roleInfo, moreMembers}) {
-            let newMember;
-            if (role === "Engineer") {
-                newMember = new Engineer(name, id, email, roleInfo);
-            } else if (role === "Intern") {
-                newMember = new Intern(name, id, email, roleInfo);
-            } else {
-                newMember = new Manager(name, id, email, roleInfo);
-            }
-            employees.push(newMember);
-            addHtml(newMember)
-            .then(function() {
-                if (moreMembers === "yes") {
-                    addMember();
-                } else {
-                    finishHtml();
+            type: 'input',
+            name: 'managerId',
+            message: 'What is the managers id?',
+            validate: answer => {
+                if (answer !== "") {
+
+                    //validate that the id's do not match need to ADD this in to make sure ids, and passwords dont match
+                    return true;
                 }
-            });
-            
-        });
-    });
-}
-
-// function renderHtml(memberArray) {
-//     startHtml();
-//     for (const member of memberArray) {
-//         addHtml(member);
-//     }
-//     finishHtml();
-// }
-
-function startHtml() {
-    const html = `<!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <title>Team Profile</title>
-    </head>
-    <body>
-        <nav class="navbar navbar-dark bg-dark mb-5">
-            <span class="navbar-brand mb-0 h1 w-100 text-center">Team Profile</span>
-        </nav>
-        <div class="container">
-            <div class="row">`;
-    fs.writeFile("./output/team.html", html, function(err) {
-        if (err) {
-            console.log(err);
+                return "Please enter at least once character";
+            }
+        },
+        {
+            type: 'input',
+            name: 'managerEmail',
+            message: 'What is the managers email address?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
+        },
+        {
+            type: 'input',
+            name: 'officeNum',
+            message: 'What is the managers office number?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
         }
-    });
-    console.log("start");
+    ])
 }
-
-function addHtml(member) {
-    return new Promise(function(resolve, reject) {
-        const name = member.getName();
-        const role = member.getRole();
-        const id = member.getId();
-        const email = member.getEmail();
-        let data = "";
-        if (role === "Engineer") {
-            const gitHub = member.getGithub();
-            data = `<div class="col-6">
-            <div class="card mx-auto mb-3" style="width: 18rem">
-            <h5 class="card-header">${name}<br /><br />Engineer</h5>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">ID: ${id}</li>
-                <li class="list-group-item">Email Address: ${email}</li>
-                <li class="list-group-item">GitHub: ${gitHub}</li>
-            </ul>
-            </div>
-        </div>`;
-        } else if (role === "Intern") {
-            const school = member.getSchool();
-            data = `<div class="col-6">
-            <div class="card mx-auto mb-3" style="width: 18rem">
-            <h5 class="card-header">${name}<br /><br />Intern</h5>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">ID: ${id}</li>
-                <li class="list-group-item">Email Address: ${email}</li>
-                <li class="list-group-item">School: ${school}</li>
-            </ul>
-            </div>
-        </div>`;
-        } else {
-            const officePhone = member.getOfficeNumber();
-            data = `<div class="col-6">
-            <div class="card mx-auto mb-3" style="width: 18rem">
-            <h5 class="card-header">${name}<br /><br />Manager</h5>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">ID: ${id}</li>
-                <li class="list-group-item">Email Address: ${email}</li>
-                <li class="list-group-item">Office Phone: ${officePhone}</li>
-            </ul>
-            </div>
-        </div>`
+async function createEngineer() {
+    return await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'engineerName',
+            message: 'What is your name?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
+        },
+        {
+            type: 'input',
+            name: 'engineerId',
+            message: 'What is the engineers id?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
+        },
+        {
+            type: 'input',
+            name: 'engineerEmail',
+            message: 'What is the engineers email?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
+        },
+        {
+            type: 'input',
+            name: 'engineerGit',
+            messgae: 'What is the engineers github username?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
         }
-        console.log("adding team member");
-        fs.appendFile("./output/team.html", data, function (err) {
-            if (err) {
-                return reject(err);
-            };
-            return resolve();
-        });
-    });
-    
-            
-    
-        
-    
-    
+    ])
+}
+async function createIntern() {
+    return await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'internName',
+            message: 'What is your name?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
+        },
+        {
+            type: 'input',
+            name: 'internId',
+            message: 'What is the interns id?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
+        },
+        {
+            type: 'input',
+            name: 'internEmail',
+            message: 'What is the interns email?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
+        },
+        {
+            type: 'input',
+            name: 'internSchool',
+            messgae: 'What school did the intern attend?',
+            validate: answer => {
+                if (answer !== "") {
+                    return true;
+                }
+                return "Please enter at least once character";
+            }
+        }
+    ])
 }
 
-function finishHtml() {
-    const html = ` </div>
-    </div>
-    
-</body>
-</html>`;
 
-    fs.appendFile("./output/team.html", html, function (err) {
-        if (err) {
-            console.log(err);
-        };
-    });
-    console.log("end");
+async function menu() {
+    const managerInfo = await createManager();
+    const manager = new Manager(managerInfo.managerName, managerInfo.managerId, managerInfo.managerEmail, managerInfo.officeNum);
+
+    members.push(manager);
+    idArr.push(manager.id);
+
+    const memberSelect = await addTeamMember();
+
 }
-
-// addMember();
-// startHtml();
-// addHtml("hi")
-// .then(function() {
-// finishHtml();
-// });
-initApp();
+menu();
 
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
